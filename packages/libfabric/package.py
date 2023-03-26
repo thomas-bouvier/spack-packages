@@ -38,6 +38,7 @@ class Libfabric(BuiltinLibfabric):
     # This is a local variant used to configure libfabric with cuda support
     variant('gdrcopy', default=False, description='Configure with gdrcopy support')
     depends_on('gdrcopy', when='+gdrcopy')
+    conflicts('~cuda', when='+gdrcopy')
 
     # overriding the inherited class member has unusual side effects
     # ==> Error: module 'spack' has no attribute 'Libfabric'
@@ -78,7 +79,7 @@ class Libfabric(BuiltinLibfabric):
 
         if '+cuda' in spec:
             config_args.append('--with-cuda={0}'.format(self.spec['cuda'].prefix))
-        
+
         if '+gdrcopy' in spec:
             config_args.append('--with-gdrcopy={0}'.format(self.spec['gdrcopy'].prefix))
 

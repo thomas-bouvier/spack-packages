@@ -1,0 +1,98 @@
+From a7aed5aad078a80053b7eaa03d822aacc4c5c4a2 Mon Sep 17 00:00:00 2001
+From: Krzysztof Lecki <klecki@nvidia.com>
+Date: Wed, 24 May 2023 18:48:44 +0200
+Subject: [PATCH] Relax the gast version requirement
+
+Handle the missing type_comment parameter in gast.Assign usages.
+
+Signed-off-by: Krzysztof Lecki <klecki@nvidia.com>
+---
+ dali/python/nvidia/dali/_autograph/pyct/testing/codegen.py | 2 +-
+ dali/python/nvidia/dali/_autograph/pyct/transpiler.py      | 3 ++-
+ dali/python/setup.py.in                                    | 4 ++--
+ dali/test/python/autograph/pyct/test_parser.py             | 6 ++++--
+ dali/test/python/autograph/pyct/test_templates.py          | 1 +
+ 5 files changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/dali/python/nvidia/dali/_autograph/pyct/testing/codegen.py b/dali/python/nvidia/dali/_autograph/pyct/testing/codegen.py
+index 63a9d442e2..1138419f2b 100644
+--- a/dali/python/nvidia/dali/_autograph/pyct/testing/codegen.py
++++ b/dali/python/nvidia/dali/_autograph/pyct/testing/codegen.py
+@@ -167,7 +167,7 @@ def generate_Assign(self):
+     # Generate right-hand side
+     value_node = self.generate_expression()
+     # Put it all together
+-    node = gast.Assign(targets=[target_node], value=value_node)
++    node = gast.Assign(targets=[target_node], value=value_node, type_comment=None)
+     return node
+ 
+   def generate_If(self):
+diff --git a/dali/python/nvidia/dali/_autograph/pyct/transpiler.py b/dali/python/nvidia/dali/_autograph/pyct/transpiler.py
+index 8ff1069ea2..095b6ab7d9 100644
+--- a/dali/python/nvidia/dali/_autograph/pyct/transpiler.py
++++ b/dali/python/nvidia/dali/_autograph/pyct/transpiler.py
+@@ -474,7 +474,8 @@ def transform_function(self, fn, user_context):
+                         annotation=None,
+                         type_comment=None)
+                 ],
+-                value=nodes)
++                value=nodes,
++                type_comment=None)
+           else:
+             nodes.name = ctx.info.name
+ 
+diff --git a/dali/python/setup.py.in b/dali/python/setup.py.in
+index 74c91e92f5..51be535e99 100644
+--- a/dali/python/setup.py.in
++++ b/dali/python/setup.py.in
+@@ -1,4 +1,4 @@
+-# Copyright (c) 2017-2022, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
++# Copyright (c) 2017-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+@@ -84,7 +84,7 @@ For more details please check the |release-doc|_.
+           # gast and astunparse are required for AutoGraph.
+           # Currently supported range of versions.
+           'astunparse >= 1.6.0',
+-          'gast >= 0.2.1, <= 0.4.0',
++          'gast >= 0.2.1',
+           ],
+      )
+ 
+diff --git a/dali/test/python/autograph/pyct/test_parser.py b/dali/test/python/autograph/pyct/test_parser.py
+index 03053484dd..f15a5a7714 100644
+--- a/dali/test/python/autograph/pyct/test_parser.py
++++ b/dali/test/python/autograph/pyct/test_parser.py
+@@ -349,7 +349,8 @@ def test_unparse(self):
+                         type_comment=None)
+                 ],
+                 value=gast.Name(
+-                    'b', ctx=gast.Load(), annotation=None, type_comment=None))
++                    'b', ctx=gast.Load(), annotation=None, type_comment=None),
++                type_comment=None)
+         ],
+         orelse=[
+             gast.Assign(
+@@ -360,7 +361,8 @@ def test_unparse(self):
+                         annotation=None,
+                         type_comment=None)
+                 ],
+-                value=gast.Constant('c', kind=None))
++                value=gast.Constant('c', kind=None),
++                type_comment=None)
+         ])
+ 
+     source = parser.unparse(node, indentation='  ')
+diff --git a/dali/test/python/autograph/pyct/test_templates.py b/dali/test/python/autograph/pyct/test_templates.py
+index 3d0ca00287..6e5dba8ecc 100644
+--- a/dali/test/python/autograph/pyct/test_templates.py
++++ b/dali/test/python/autograph/pyct/test_templates.py
+@@ -126,6 +126,7 @@ class ShouldBeReplaced(object):
+                         annotation=None,
+                         type_comment=None), gast.Add(),
+                     gast.Constant(1, kind=None)),
++                None
+             ),
+         ] * 2)[0]
+     result, _, _ = loader.load_ast(node)

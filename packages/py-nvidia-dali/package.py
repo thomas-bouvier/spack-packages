@@ -21,6 +21,15 @@ class PyNvidiaDali(PythonPackage):
     system = platform.system().lower()
     arch = platform.machine()
     if "linux" in system and arch == "x86_64":
+        """
+        version(
+            "1.27.0-cuda110",
+            sha256="",
+            expand=False,
+            preferred=True,
+            url="",
+        )
+        """
         version(
             "1.26.0-cuda120",
             sha256="784dbad4e4e1399b4d2f51bfa1a01e3e23f6fb37e8f327cf136df9c1b5fb8470",
@@ -145,8 +154,6 @@ class PyNvidiaDali(PythonPackage):
             url="https://developer.download.nvidia.com/compute/redist/nvidia-dali-cuda110/nvidia_dali_cuda110-1.22.0-6988993-py3-none-manylinux2014_aarch64.whl",
         )
 
-    patch('py-nvidia-dali-upgrade-py-gast.patch')
-
     cuda120_versions = (
         "1.22.0-cuda120",
         "1.23.0-cuda120",
@@ -170,4 +177,6 @@ class PyNvidiaDali(PythonPackage):
     depends_on("python@3.6:3.11", when="@1.23:", type=("build", "run"))
     depends_on("python@3.6:3.10", when="@:1.22", type=("build", "run"))
     depends_on("py-astunparse@1.6.0:", type=("build", "run"))
-    depends_on("py-gast@0.5", type=("build", "run"))
+    #depends_on("py-gast@0.2.1:0.4.0", when="@:1.26", type=("build", "run"))
+    #depends_on("py-gast@0.3.3", when="@1.27:", type=("build", "run"))
+    depends_on("py-gast@0.3.3", type=("build", "run"))

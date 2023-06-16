@@ -22,6 +22,12 @@ class PyNvidiaDali(PythonPackage):
     arch = platform.machine()
     if "linux" in system and arch == "x86_64":
         version(
+            "1.27.0-dev-cuda120",
+            sha256="da0b3dd9e27818fbd2c9bde759fc4c070542f3858812a7ce2ad9a866cce5e19d",
+            expand=False,
+            url="https://developer.download.nvidia.com/compute/redist/nightly/nvidia-dali-nightly-cuda120/nvidia_dali_nightly_cuda120-1.28.0.dev20230614-8636423-py3-none-manylinux2014_x86_64.whl",
+        )
+        version(
             "1.27.0-dev-cuda110",
             sha256="f00208e7437261cc6938bcbe94d13839736d3d2a48834cac73b0ccace0206cf7",
             expand=False,
@@ -91,6 +97,12 @@ class PyNvidiaDali(PythonPackage):
     elif "linux" in system and arch == "aarch64":
         version(
             "1.27.0-dev-cuda120",
+            sha256="ef32953d8c0f5130169b832aa9fe4869a9f80f0208ad6e0ca50d39adffe18242",
+            expand=False,
+            url="https://developer.download.nvidia.com/compute/redist/nightly/nvidia-dali-nightly-cuda120/nvidia_dali_nightly_cuda120-1.28.0.dev20230614-8636423-py3-none-manylinux2014_aarch64.whl",
+        )
+        version(
+            "1.27.0-dev-cuda110",
             sha256="ff6ce41a2b131c12f6eb0f1bce823c9489aa8ed0e5637e3c7b3010d4d705f8b9",
             expand=False,
             preferred=True,

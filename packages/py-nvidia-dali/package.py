@@ -195,4 +195,4 @@ class PyNvidiaDali(PythonPackage):
     depends_on("python@3.6:3.10", when="@:1.22", type=("build", "run"))
     depends_on("py-astunparse@1.6.0:", type=("build", "run"))
     depends_on("py-gast@0.2.1:0.4.0", when="@:1.26", type=("build", "run"))
-    depends_on("py-gast@0.3.3", when="@1.27:", type=("build", "run"))
+    depends_on("py-gast@0.3.3:", when="@1.27:", type=("build", "run"))

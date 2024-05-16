@@ -16,10 +16,8 @@ class PyKhorovod(PythonPackage, CudaPackage):
 
     maintainers("thomas-bouvier")
 
-    version("master", branch="master", submodules=True)
-    version(
-        "0.29.0", tag="v0.29.0", commit="1d217b59949986d025f6db93c49943fb6b6cc78f", submodules=True
-    )
+    version("main", branch="main", submodules=True)
+    version("develop", branch="develop", submodules=True)
 
     # https://github.com/horovod/horovod/blob/master/docs/install.rst
     variant(
@@ -123,8 +121,6 @@ class PyKhorovod(PythonPackage, CudaPackage):
     conflicts(
         "controllers=gloo", when="@:0.20.0 platform=darwin", msg="Gloo cannot be compiled on MacOS"
     )
-    # https://github.com/horovod/horovod/issues/3996
-    conflicts("^py-torch@2.1:")
 
     # https://github.com/horovod/horovod/pull/1835
     patch("fma.patch", when="@0.19.0:0.19.1")

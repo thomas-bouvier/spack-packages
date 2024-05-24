@@ -193,15 +193,15 @@ class PyKhorovod(PythonPackage, CudaPackage):
 
         # Frameworks
         if "frameworks=tensorflow" in self.spec:
-            env.set("HOROVOD_WITH_TENSORFLOW", 1)
+            env.set("HOROVOD_WITH_TENSORFLOW", self.spec["py-tensorflow"].version)
         else:
             env.set("HOROVOD_WITHOUT_TENSORFLOW", 1)
         if "frameworks=pytorch" in self.spec:
-            env.set("HOROVOD_WITH_PYTORCH", 1)
+            env.set("HOROVOD_WITH_PYTORCH", self.spec["py-torch"].version)
         else:
             env.set("HOROVOD_WITHOUT_PYTORCH", 1)
         if "frameworks=mxnet" in self.spec:
-            env.set("HOROVOD_WITH_MXNET", 1)
+            env.set("HOROVOD_WITH_MXNET", self.spec["mxnet"].version)
             env.set("MXNET_INCLUDE_PATH", self.spec["mxnet"].prefix.include)
             env.set("MXNET_LIBRARY_PATH", join_path(self.spec["mxnet"].libs[0]))
         else:

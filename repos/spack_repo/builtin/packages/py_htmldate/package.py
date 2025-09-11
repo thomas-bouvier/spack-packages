@@ -25,5 +25,5 @@ class PyHtmldate(PythonPackage):
     depends_on("py-lxml@4.9.2", when="platform=darwin ^python@:3.8", type=("build", "run"))
     depends_on("py-lxml@5.3.0:5", when="platform=linux", type=("build", "run"))
     depends_on("py-lxml@5.3.0:5", when="^python@3.9:", type=("build", "run"))
-    depends_on("py-python-dateutil@2.9.0.post0:", type=("build", "run"))
+    depends_on("py-python-dateutil@2.9.0:", type=("build", "run"))
     depends_on("py-urllib3@1.26:2", type=("build", "run"))

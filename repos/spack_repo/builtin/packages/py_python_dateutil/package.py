@@ -15,9 +15,10 @@ class PyPythonDateutil(PythonPackage):
 
     license("Apache-2.0")
 
-    version(
-        "2.9.0.post0", sha256="37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"
-    )
+    #version(
+    #    "2.9.0.post0", sha256="37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"
+    #)
+    version("2.9.0", sha256="78e73e19c63f5b20ffa567001531680d939dc042bf7850431877645523c66709")
     version("2.8.2", sha256="0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86")
     version("2.8.1", sha256="73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c")
     version("2.8.0", sha256="c89805f6f4d64db21ed966fda138f8a5ed7a4fdbc1a8ee329ce1b74e3c74da9e")

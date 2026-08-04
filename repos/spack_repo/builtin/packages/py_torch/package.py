@@ -181,6 +181,12 @@ class PyTorch(PythonPackage, CudaPackage, ROCmPackage):
         depends_on("gloo@2026-02-12", when="@2.13")
         depends_on("gloo@2025-12-02", when="@2.11:2.12")
         depends_on("gloo@2025-08-21", when="@:2.10")
+        # Note: we do NOT add +cuda to the external gloo here. gloo+cuda
+        # includes py-torch's c10 headers (GLOO_USE_TORCH_DTYPES), creating a
+        # circular dependency. When +gloo+cuda, py-torch builds its vendored
+        # gloo submodule for CUDA support (see USE_SYSTEM_GLOO in
+        # setup_build_environment) and uses the external gloo only for the
+        # CPU distributed backend.
         depends_on("gloo+libuv", when="platform=darwin")
         # Note: we do NOT add +cuda to the external gloo here. gloo+cuda
         # includes py-torch's c10 headers (GLOO_USE_TORCH_DTYPES), creating a

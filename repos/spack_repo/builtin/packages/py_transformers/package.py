@@ -33,9 +33,9 @@ class PyTransformers(PythonPackage):
     version("4.6.1", sha256="83dbff763b7e7dc57cbef1a6b849655d4fcab6bffdd955c5e8bea12a4f76dc10")
 
     depends_on("cxx", type="build")
+    depends_on("py-setuptools", type="build")
 
-    with default_args(type="build"):
-        depends_on("py-setuptools")
+    conflicts("^py-regex@2019.12.17")
 
     with default_args(type=("build", "run")):
         depends_on("python@3.9:", when="@4.47:")
@@ -55,13 +55,12 @@ class PyTransformers(PythonPackage):
         depends_on("py-packaging", when="@4.6.1")
         depends_on("py-pyyaml@5.1:", when="@4.24:")
         depends_on("py-regex@2025.10.22:", when="@5.4:")
-        conflicts("^py-regex@2019.12.17")
         depends_on("py-requests")
         depends_on("py-safetensors@0.8", when="@5.13:")
         depends_on("py-safetensors@0.4.3:", when="@4.57:")
         depends_on("py-safetensors@0.4.1:", when="@4.38.1:")
         depends_on("py-safetensors@0.3.1:", when="@4.31:")
-        depends_on("py-safetensors@0.23.1:0.23", when="@5.16:")
+        depends_on("py-tokenizers@0.23.1:0.23", when="@5.16:")
         depends_on("py-tokenizers@0.22:0.23.0", when="@4.57:")
         depends_on("py-tokenizers@0.21", when="@4.47:4.48.3")
         depends_on("py-tokenizers@0.20", when="@4.45:4.46")

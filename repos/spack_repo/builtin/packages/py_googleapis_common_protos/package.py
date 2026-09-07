@@ -21,6 +21,7 @@ class PyGoogleapisCommonProtos(PythonPackage):
     version("1.57.1", sha256="e877f2f041b640b4888b6917dde4f44515ab938bf744c4dbc06f11f0e8ed56b5")
     version("1.56.4", sha256="c25873c47279387cfdcbdafa36149887901d36202cb645a0e4f29686bf6e4417")
     version("1.55.0", sha256="53eb313064738f45d5ac634155ae208e121c963659627b90dfcb61ef514c03e1")
+    version("1.52.0", sha256="560716c807117394da12cecb0a54da5a451b5cf9866f1d37e9a5e2329a665351")
     version("1.6.0", sha256="e61b8ed5e36b976b487c6e7b15f31bb10c7a0ca7bd5c0e837f4afab64b53a0c6")
 
     variant(

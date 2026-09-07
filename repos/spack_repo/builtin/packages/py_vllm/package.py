@@ -4,8 +4,8 @@
 
 
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 from spack_repo.builtin.build_systems.python import PythonPackage
+from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
@@ -167,13 +167,17 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on("py-setproctitle", type=("build", "run"))
     depends_on("py-openai-harmony@0.0.3:", type=("build", "run"))
     depends_on("py-anthropic@0.71:", type=("build", "run"))
-    depends_on("py-model-hosting-container-standards@0.1.14:0", type=("build", "run"), when="@0.21:")
+    depends_on(
+        "py-model-hosting-container-standards@0.1.14:0", type=("build", "run"), when="@0.21:"
+    )
     depends_on("py-model-hosting-container-standards@0.1.13:0", type=("build", "run"))
     depends_on("py-mcp", type=("build", "run"))
     depends_on("py-opentelemetry-sdk@1.27:", type=("build", "run"), when="@0.17:")
     depends_on("py-opentelemetry-api@1.27:", type=("build", "run"), when="@0.17:")
     depends_on("py-opentelemetry-exporter-otlp@1.27:", type=("build", "run"), when="@0.17:")
-    depends_on("py-opentelemetry-semantic-conventions-ai@0.4.1:", type=("build", "run"), when="@0.17:")
+    depends_on(
+        "py-opentelemetry-semantic-conventions-ai@0.4.1:", type=("build", "run"), when="@0.17:"
+    )
 
     # Historical dependencies
     depends_on("py-gguf@0.17:", type=("build", "run"), when="@:0.23")

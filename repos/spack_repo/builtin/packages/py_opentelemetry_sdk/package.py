@@ -23,6 +23,10 @@ class PyOpentelemetrySdk(PythonPackage):
 
     depends_on("py-opentelemetry-api@1.44.0", type=("build", "run"), when="@1.44.0")
     depends_on("py-opentelemetry-api@1.41.0", type=("build", "run"), when="@1.41.0")
-    depends_on("py-opentelemetry-semantic-conventions@0.65b0", type=("build", "run"), when="@1.44.0")
-    depends_on("py-opentelemetry-semantic-conventions@0.62b0", type=("build", "run"), when="@1.41.0")
+    depends_on(
+        "py-opentelemetry-semantic-conventions@0.65b0", type=("build", "run"), when="@1.44.0"
+    )
+    depends_on(
+        "py-opentelemetry-semantic-conventions@0.62b0", type=("build", "run"), when="@1.41.0"
+    )
     depends_on("py-typing-extensions@4.5:", type=("build", "run"))

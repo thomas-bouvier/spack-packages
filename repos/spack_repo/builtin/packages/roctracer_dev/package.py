@@ -156,9 +156,7 @@ class RoctracerDev(ROCmLibrary, CMakePackage, ROCmPackage):
             # the unversioned dev symlink, so we glob for what exists.
             gcc_lib = str(self.spec["gcc-runtime"].prefix.lib)
             atomic_libs = sorted(
-                f
-                for f in _glob.glob(join_path(gcc_lib, "libatomic.so*"))
-                if os.path.exists(f)
+                f for f in _glob.glob(join_path(gcc_lib, "libatomic.so*")) if os.path.exists(f)
             )
             if atomic_libs:
                 args.append(self.define("ATOMIC_LIBRARY", atomic_libs[0]))

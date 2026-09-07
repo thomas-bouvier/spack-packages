@@ -4,8 +4,8 @@
 
 import os
 
-from spack_repo.builtin.build_systems.python import PythonPackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
+from spack_repo.builtin.build_systems.python import PythonPackage
 from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
@@ -22,7 +22,7 @@ class PyTriton(PythonPackage, CudaPackage, ROCmPackage):
 
     license("MIT")
 
-    #version("main", branch="main")
+    # version("main", branch="main")
     version("3.5.1", sha256="03d7c41f6f2dc1dfa3445776c4a893dc34b1e0ece42b953f036c071ff6409b80")
     version("3.4.0", sha256="a96e87a911794c907fab30e0c7a3f96ef4e9e8fdc8812cd8bbc6f0457619072f")
     version("3.3.1", sha256="9dc77d9205933bf2fc05eb054f4f1d92acd79a963826174d57fe9cfd58ba367b")
@@ -52,7 +52,7 @@ class PyTriton(PythonPackage, CudaPackage, ROCmPackage):
         depends_on("llvm@13 +mlir +utils", when="@2.1.0")
         depends_on("nlohmann-json@3.11.3", when="@3:")
         depends_on("py-pybind11")
-        #depends_on("roctracer-dev")
+        # depends_on("roctracer-dev")
         depends_on("cuda@10:")
 
     depends_on("py-setuptools@40.8.0:", type="run", when="@3.2.0")
@@ -195,7 +195,7 @@ class PyTriton(PythonPackage, CudaPackage, ROCmPackage):
         env.set("LLVM_SYSPATH", self.spec["llvm"].prefix)
         env.set("JSON_SYSPATH", self.spec["nlohmann-json"].prefix)
         env.set("PYBIND11_SYSPATH", self.spec["py-pybind11"].prefix)
-        #env.set("TRITON_ROCTRACER_INCLUDE_PATH", self.spec["roctracer-dev"].prefix.include)
+        # env.set("TRITON_ROCTRACER_INCLUDE_PATH", self.spec["roctracer-dev"].prefix.include)
 
         cuda = self.spec["cuda"].prefix
         env.set("TRITON_PTXAS_PATH", cuda.bin.ptxas)

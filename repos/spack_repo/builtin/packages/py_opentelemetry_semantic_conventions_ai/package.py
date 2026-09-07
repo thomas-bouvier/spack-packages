@@ -12,7 +12,9 @@ class PyOpentelemetrySemanticConventionsAi(PythonPackage):
     """OpenTelemetry Semantic Conventions Extension for Large Language Models."""
 
     homepage = "https://github.com/open-telemetry/opentelemetry-python"
-    pypi = "opentelemetry_semantic_conventions_ai/opentelemetry_semantic_conventions_ai-0.5.1.tar.gz"
+    pypi = (
+        "opentelemetry_semantic_conventions_ai/opentelemetry_semantic_conventions_ai-0.5.1.tar.gz"
+    )
 
     version("0.5.1", sha256="153906200d8c1d2f8e09bd78dbef526916023de85ac3dab35912bfafb69ff04c")
 

@@ -15,7 +15,9 @@ class PyRegex(PythonPackage):
 
     license("Apache-2.0")
 
-    version("2025.10.22", sha256="cc50db098b9d678ace33176a3ab4099616726ae4680fee6ac292302e8950fc4c")
+    version(
+        "2025.10.22", sha256="cc50db098b9d678ace33176a3ab4099616726ae4680fee6ac292302e8950fc4c"
+    )
     version("2024.11.6", sha256="7ab159b063c52a0333c884e4679f8d7a85112ee3078fe3d9004b2dd875585519")
     version("2022.8.17", sha256="5c77eab46f3a2b2cd8bbe06467df783543bf7396df431eb4a144cc4b89e9fb3c")
     version(

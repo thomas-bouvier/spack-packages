@@ -25,9 +25,6 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     # https://github.com/vllm-project/vllm/pull/34052
     patch("fix-mla-decode-avx2.patch", when="@0.16.0")
 
-    variant("cuda", default=False, description="Use CUDA")
-    variant("rocm", default=False, description="Use ROCm")
-
     conflicts("+cuda+rocm")
 
     conflicts(
@@ -103,7 +100,7 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     # Add resource() entries for each and export the corresponding env vars
     # in setup_build_environment if/when offline builds are required.
 
-    # Common deps https://github.com/vllm-project/vllm/blob/v0.15.1/requirements/common.txt
+    # Common deps https://github.com/vllm-project/vllm/blob/v0.16.0/requirements/common.txt
     depends_on("py-regex", type=("build", "run"))
     depends_on("py-cachetools", type=("build", "run"))
     depends_on("py-psutil", type=("build", "run"))
@@ -114,7 +111,7 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on("py-blake3", type=("build", "run"))
     depends_on("py-py-cpuinfo", type=("build", "run"))
     depends_on("py-transformers@5.5.3:", type=("build", "run"), when="@0.24:")
-    depends_on("py-transformers@4.56:4", type=("build", "run"))
+    depends_on("py-transformers@4.56:4", type=("build", "run"), when="@:0.19.0")
     depends_on("py-huggingface-hub@1.27:", type=("build", "run"), when="@0.28:")
     depends_on("py-tokenizers@0.21.1:", type=("build", "run"))
     depends_on("py-safetensors@0.6.2:", type=("build", "run"), when="@0.22:")
@@ -137,12 +134,12 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on("py-tiktoken@0.6:", type=("build", "run"))
     depends_on("py-lm-format-enforcer@0.11.3", type=("build", "run"))
     depends_on("py-llguidance@1.7", type=("build", "run"), when="@0.22:")
-    depends_on("py-llguidance@1.3", type=("build", "run"))
+    depends_on("py-llguidance@1.3", type=("build", "run"), when="@:0.21")
     depends_on("py-outlines-core@0.2.14", type=("build", "run"), when="@0.20:")
-    depends_on("py-outlines-core@0.2.11", type=("build", "run"))
+    depends_on("py-outlines-core@0.2.11", type=("build", "run"), when="@:0.19")
     depends_on("py-lark@1.2.2", type=("build", "run"))
-    depends_on("py-xgrammar@0.2.1:", type=("build", "run"), when="@0.24:")
-    depends_on("py-xgrammar@0.1.29", type=("build", "run"))
+    depends_on("py-xgrammar@0.2.1:0", type=("build", "run"), when="@0.24:")
+    depends_on("py-xgrammar@0.1.29", type=("build", "run"), when="@:0.17.1")
     depends_on("py-typing-extensions@4.10:", type=("build", "run"))
     depends_on("py-filelock@3.16.1:", type=("build", "run"))
     depends_on("py-partial-json-parser", type=("build", "run"))
@@ -156,7 +153,7 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on("py-six@1.16:", when="^python@3.12:", type=("build", "run"))
     depends_on("py-einops", type=("build", "run"))
     depends_on("py-compressed-tensors@0.17.0", type=("build", "run"), when="@0.23:")
-    depends_on("py-compressed-tensors@0.13.0", type=("build", "run"))
+    depends_on("py-compressed-tensors@0.13.0", type=("build", "run"), when="@:0.18")
     depends_on("py-depyf@0.20.0", type=("build", "run"))
     depends_on("py-cloudpickle", type=("build", "run"))
     depends_on("py-watchfiles", type=("build", "run"))
@@ -170,11 +167,12 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on(
         "py-model-hosting-container-standards@0.1.14:0", type=("build", "run"), when="@0.21:"
     )
-    depends_on("py-model-hosting-container-standards@0.1.13:0", type=("build", "run"))
+    depends_on("py-model-hosting-container-standards@0.1.13:0", type=("build", "run"), when="@:0.20")
     depends_on("py-mcp", type=("build", "run"))
     depends_on("py-opentelemetry-sdk@1.27:", type=("build", "run"), when="@0.17:")
     depends_on("py-opentelemetry-api@1.27:", type=("build", "run"), when="@0.17:")
-    depends_on("py-opentelemetry-exporter-otlp@1.27:", type=("build", "run"), when="@0.17:")
+    # This dependency brings exporters pinned at version @1.15, causing concretization errors
+    #depends_on("py-opentelemetry-exporter-otlp@1.27:", type=("build", "run"), when="@0.17:")
     depends_on(
         "py-opentelemetry-semantic-conventions-ai@0.4.1:", type=("build", "run"), when="@0.17:"
     )

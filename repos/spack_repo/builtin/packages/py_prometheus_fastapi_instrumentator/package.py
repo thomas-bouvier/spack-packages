@@ -19,5 +19,5 @@ class PyPrometheusFastapiInstrumentator(PythonPackage):
     depends_on("python@3.8:", type=("build", "run"))
     depends_on("py-poetry-core@2:", type="build")
     depends_on("py-starlette@1", type=("build", "run"), when="@8:")
-    depends_on("py-starlette@0.30:0", type=("build", "run"))
+    depends_on("py-starlette@0.30:0", type=("build", "run"), when="@:7")
     depends_on("py-prometheus-client@0.8:0", type=("build", "run"))

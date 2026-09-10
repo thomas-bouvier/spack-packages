@@ -16,9 +16,11 @@ class PyXgrammar(PythonPackage):
     version("0.2.3", sha256="f76423630ae3ac4e090cb38ce1e30e7bcc69b3dee4d22d94353944386a4c6f18")
     version("0.1.29", sha256="cf195afa81b489eebf35d4c6f37f27136d05420739ab4a6f7f065c938d7e4baa")
 
-    # nanobind's nb_type_get/nb_type_put have hidden visibility and get
-    # dropped by GCC's LTO, causing undefined references at link time.
+    # GCC LTO can drop symbols from the static libxgrammar archive that the
+    # bindings later need (e.g. Grammar::ToString with tvm_ffi, or nanobind
+    # type get/put). Disable -flto=auto for affected versions.
     # See https://github.com/wjakob/nanobind/issues/795.
+    patch("no-lto-0.2.3.patch", when="@0.2.3")
     patch("no-lto-nanobind.patch", when="@0.1.29")
 
     depends_on("py-scikit-build-core@0.10:", type="build")

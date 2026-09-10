@@ -25,14 +25,12 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     # https://github.com/vllm-project/vllm/pull/34052
     patch("fix-mla-decode-avx2.patch", when="@0.16.0")
 
-    conflicts("+cuda+rocm")
+    # Spack-built torch has no vendored libgomp; the REQUIRED find_library(gomp)
+    # fallback then fails configure even though OPEN_MP is unused and -fopenmp
+    # already supplies OpenMP flags.
+    patch("no-required-gomp.patch", when="@0.28.0")
 
-    conflicts(
-        "cuda_arch=none",
-        when="+cuda",
-        msg="Must specify CUDA compute capabilities of your GPU, see "
-        "https://developer.nvidia.com/cuda-gpus",
-    )
+    conflicts("+cuda+rocm")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
@@ -49,12 +47,20 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on("py-jinja2", type="build")
     depends_on("py-grpcio-tools", type="build", when="@:0.17")
 
-    # PyTorch is imported at build time to read metadata
-    depends_on("py-torch@2.13.0 +gloo", when="@0.28.0 ~cuda~rocm", type="build")
-    depends_on("py-torch@2.10.0 +gloo", when="@0.16.0 ~cuda~rocm", type="build")
-    depends_on("py-torch~cuda~rocm", when="~cuda~rocm", type="build")
+    with when("~cuda~rocm"):
+        # PyTorch is imported at build time to read metadata
+        depends_on("py-torch@2.13.0 +kineto +gloo", when="@0.28.0", type="build")
+        depends_on("py-torch@2.10.0 +kineto +gloo", when="@0.16.0", type="build")
+        depends_on("sleef", type=("build", "link"))
 
     with when("+cuda"):
+        depends_on("cuda", type=("build", "link", "run"))
+        conflicts(
+            "cuda_arch=none",
+            msg="Must specify CUDA compute capabilities of your GPU, see "
+            "https://developer.nvidia.com/cuda-gpus",
+        )
+
         depends_on("py-torch@2.9.1 +gloo", when="@0.16.0", type="build")
         # cuDNN / cuSPARSELt / kineto must be enabled in py-torch itself,
         # otherwise vLLM's CMake reports USE_CUDNN=0, USE_CUSPARSELT=0 and
@@ -77,28 +83,22 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
                 type="build",
             )
 
-    # CUTLASS source. vLLM's CMakeLists.txt pins CUTLASS_REVISION to v4.2.1 for
-    # v0.16.0 and uses FetchContent_Declare(cutlass SOURCE_DIR ...), which needs
-    # the full source tree (not just an install prefix with headers). We drop
-    # the source into the build tree via a Spack resource and point
-    # VLLM_CUTLASS_SRC_DIR at it in setup_build_environment.
-    resource(
-        name="cutlass",
-        url="https://github.com/NVIDIA/cutlass/archive/refs/tags/v4.2.1.tar.gz",
-        sha256="a4513ba33ae82fd754843c6d8437bee1ac71a6ef1c74df886de2338e3917d4df",
-        destination=".",
-        placement="cutlass-src",
-        when="@0.16.0 +cuda",
-    )
+        # CUTLASS source. vLLM's CMakeLists.txt pins CUTLASS_REVISION to v4.2.1 for
+        # v0.16.0 and uses FetchContent_Declare(cutlass SOURCE_DIR ...), which needs
+        # the full source tree (not just an install prefix with headers). We drop
+        # the source into the build tree via a Spack resource and point
+        # VLLM_CUTLASS_SRC_DIR at it in setup_build_environment.
+        resource(
+            name="cutlass",
+            url="https://github.com/NVIDIA/cutlass/archive/refs/tags/v4.2.1.tar.gz",
+            sha256="a4513ba33ae82fd754843c6d8437bee1ac71a6ef1c74df886de2338e3917d4df",
+            destination=".",
+            placement="cutlass-src",
+            when="@0.16.0",
+        )
 
-    # TODO: vLLM 0.16.0 also FetchContents the following at configure time and
-    # will fail without network:
-    #   - flashmla       (env override: FLASH_MLA_SRC_DIR)
-    #   - qutlass        (env override: QUTLASS_SRC_DIR)
-    #   - vllm-flash-attn(env override: VLLM_FLASH_ATTN_SRC_DIR)
-    #   - triton_kernels (env override: TRITON_KERNELS_SRC_DIR)
-    # Add resource() entries for each and export the corresponding env vars
-    # in setup_build_environment if/when offline builds are required.
+    with when("+rocm"):
+        depends_on("hip")
 
     # Common deps https://github.com/vllm-project/vllm/blob/v0.16.0/requirements/common.txt
     depends_on("py-regex", type=("build", "run"))
@@ -183,13 +183,6 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on("py-grpcio", type=("build", "run"), when="@:0.17")
     depends_on("py-grpcio-reflection", type=("build", "run"), when="@:0.17")
 
-    # Optional dependencies
-    with default_args(type=("build", "link", "run")):
-        depends_on("cuda", when="+cuda")
-
-    with when("+rocm"):
-        depends_on("hip")
-
     def setup_build_environment(self, env: EnvironmentModifications) -> None:
         # Override version to avoid setuptools_scm requiring a git repo
         # and to bypass get_vllm_version() device-detection logic
@@ -223,6 +216,12 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
         numa_lib = self.spec["numactl"].prefix.lib
         env.append_flags("CXXFLAGS", f"-I{numa_inc}")
         env.append_flags("LDFLAGS", f"-L{numa_lib}")
+
+        if self.spec.satisfies("~cuda~rocm"):
+            sleef_inc = self.spec["sleef"].prefix.include
+            sleef_lib = self.spec["sleef"].prefix.lib
+            env.append_flags("CXXFLAGS", f"-I{sleef_inc}")
+            env.append_flags("LDFLAGS", f"-L{sleef_lib} -lsleef")
 
     def setup_run_environment(self, env: EnvironmentModifications) -> None:
         # Triton JIT-compiles its CUDA driver (driver.c / cuda_utils.c) at

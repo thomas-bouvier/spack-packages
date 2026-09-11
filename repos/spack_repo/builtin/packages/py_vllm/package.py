@@ -49,9 +49,22 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
 
     with when("~cuda~rocm"):
         # PyTorch is imported at build time to read metadata
-        depends_on("py-torch@2.13.0 +kineto +gloo", when="@0.28.0", type="build")
-        depends_on("py-torch@2.10.0 +kineto +gloo", when="@0.16.0", type="build")
-        depends_on("sleef", type=("build", "link"))
+        depends_on("py-torch@2.13.0 +kineto +gloo", type="build", when="@0.28.0")
+        depends_on("py-torch@2.10.0 +kineto +gloo", type="build", when="@0.16.0")
+        depends_on("sleef", type=("build", "run", "link"))
+        # oneDNN source. vLLM's cmake/cpu_extension.cmake fetches oneDNN via
+        # FetchContent and compiles private headers from src/ (e.g.
+        # common/memory_desc.hpp). An install prefix is not enough; drop the
+        # source into the build tree and point FETCHCONTENT_SOURCE_DIR_ONEDNN
+        # at it in setup_build_environment.
+        resource(
+            name="onednn",
+            url="https://github.com/oneapi-src/oneDNN/archive/refs/tags/v3.13.tar.gz",
+            sha256="f90a34cc3f1a5af511570d72f4437205efdf97e1d28c576418daa7ef1a34daaa",
+            destination=".",
+            placement="onednn-src",
+            when="@0.28.0:",
+        )
 
     with when("+cuda"):
         depends_on("cuda", type=("build", "link", "run"))
@@ -184,12 +197,20 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on("py-grpcio-reflection", type=("build", "run"), when="@:0.17")
 
     def setup_build_environment(self, env: EnvironmentModifications) -> None:
-        # Override version to avoid setuptools_scm requiring a git repo
-        # and to bypass get_vllm_version() device-detection logic
-        env.set("VLLM_VERSION_OVERRIDE", str(self.spec.version))
+        # Override version to avoid setuptools_scm requiring a git repo.
+        # Include the device local-version label (e.g. +cpu) so runtime
+        # platform detection works without VLLM_TARGET_DEVICE: views do not
+        # apply setup_run_environment, and upstream checks version for "cpu".
+        if self.spec.satisfies("+cuda"):
+            device = "cuda"
+        elif self.spec.satisfies("+rocm"):
+            device = "rocm"
+        else:
+            device = "cpu"
+        env.set("VLLM_VERSION_OVERRIDE", f"{self.spec.version}+{device}")
+        env.set("VLLM_TARGET_DEVICE", device)
 
         if self.spec.satisfies("+cuda"):
-            env.set("VLLM_TARGET_DEVICE", "cuda")
             env.set("CUDA_HOME", self.spec["cuda"].prefix)
 
             # Point vLLM's CMake at the cutlass source tree fetched by the
@@ -207,10 +228,12 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
             torch_arch = ";".join("{}.{}".format(a[:-1], a[-1]) for a in arches)
             env.set("TORCH_CUDA_ARCH_LIST", torch_arch)
         elif self.spec.satisfies("+rocm"):
-            env.set("VLLM_TARGET_DEVICE", "rocm")
             env.set("ROCM_HOME", self.spec["rocm"].prefix)
         else:
-            env.set("VLLM_TARGET_DEVICE", "cpu")
+            env.set(
+                "FETCHCONTENT_SOURCE_DIR_ONEDNN",
+                join_path(self.stage.source_path, "onednn-src"),
+            )
 
         numa_inc = self.spec["numactl"].prefix.include
         numa_lib = self.spec["numactl"].prefix.lib
@@ -218,12 +241,24 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
         env.append_flags("LDFLAGS", f"-L{numa_lib}")
 
         if self.spec.satisfies("~cuda~rocm"):
+            # Keep -I/-L only. Putting -lsleef in LDFLAGS breaks CMake's nested
+            # oneDNN C ABI try_compile (CMAKE_SIZEOF_VOID_P unset -> "64 bit
+            # platforms only"). Torch already links sleef; the extension inherits it.
             sleef_inc = self.spec["sleef"].prefix.include
             sleef_lib = self.spec["sleef"].prefix.lib
             env.append_flags("CXXFLAGS", f"-I{sleef_inc}")
-            env.append_flags("LDFLAGS", f"-L{sleef_lib} -lsleef")
+            env.append_flags("LDFLAGS", f"-L{sleef_lib}")
 
     def setup_run_environment(self, env: EnvironmentModifications) -> None:
+        # Also set for `spack load` / env activate. Views alone do not apply
+        # this; the +cpu/+cuda/+rocm version label above is the reliable signal.
+        if self.spec.satisfies("+cuda"):
+            env.set("VLLM_TARGET_DEVICE", "cuda")
+        elif self.spec.satisfies("+rocm"):
+            env.set("VLLM_TARGET_DEVICE", "rocm")
+        else:
+            env.set("VLLM_TARGET_DEVICE", "cpu")
+
         # Triton JIT-compiles its CUDA driver (driver.c / cuda_utils.c) at
         # runtime using the system gcc, and that compile needs cuda.h.
         # Triton's build only knows about its own include dir, not CUDA's,

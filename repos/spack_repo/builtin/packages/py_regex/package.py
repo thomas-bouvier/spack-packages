@@ -34,6 +34,10 @@ class PyRegex(PythonPackage):
         "2017.07.11", sha256="dbda8bdc31a1c85445f1a1b29d04abda46e5c690f8f933a9cc3a85a358969616"
     )
 
+    # PyPI sdist ships an empty setup.py, so regex._regex is never built.
+    # Restore the upstream setup.py that declares the Extension.
+    patch("fix-empty-setup.py.patch", when="@2025.10.22")
+
     depends_on("c", type="build")
     depends_on("py-setuptools@77.0.3:", type="build", when="@2025.7.32:")
     depends_on("py-setuptools@62:", type="build", when="@2024.11.7:")

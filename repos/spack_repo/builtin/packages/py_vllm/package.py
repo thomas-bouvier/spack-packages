@@ -51,6 +51,9 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
         # PyTorch is imported at build time to read metadata
         depends_on("py-torch@2.13.0 +kineto +gloo", type="build", when="@0.28.0")
         depends_on("py-torch@2.10.0 +kineto +gloo", type="build", when="@0.16.0")
+        # https://github.com/vllm-project/vllm/blob/v0.16.0/requirements/cpu.txt
+        depends_on("py-torchvision", type=("build", "run"))
+        depends_on("py-torchaudio", type=("build", "run"))
         depends_on("sleef", type=("build", "run", "link"))
         # oneDNN source. vLLM's cmake/cpu_extension.cmake fetches oneDNN via
         # FetchContent and compiles private headers from src/ (e.g.

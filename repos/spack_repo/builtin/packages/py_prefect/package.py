@@ -61,7 +61,7 @@ class PyPrefect(PythonPackage):
     depends_on("py-jsonschema@4.18:4", type=("build", "run"))
     depends_on("py-opentelemetry-api@1.27:1", type=("build", "run"))
     depends_on("py-orjson@3.7:3", type=("build", "run"))
-    depends_on("py-packaging@21.3:", type=("build", "run"))
+    depends_on("py-packaging@21.3:", type=("build", "run"))  # remove upper bound
     depends_on("py-pathspec@0.8:", type=("build", "run"))
     depends_on("py-pendulum@3", when="^python@:3.12", type=("build", "run"))
     depends_on("py-prometheus-client@0.20:", type=("build", "run"))

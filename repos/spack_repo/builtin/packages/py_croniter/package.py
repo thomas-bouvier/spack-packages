@@ -19,6 +19,7 @@ class PyCroniter(PythonPackage):
     version("1.3.8", sha256="32a5ec04e97ec0837bcdf013767abd2e71cceeefd3c2e14c804098ce51ad6cd9")
 
     depends_on("py-setuptools", type="build")
+    # The following build dependencies are relaxed compared to upstream
     depends_on("py-hatchling@1.30.1:", type="build")
     depends_on("py-packaging@26.2:", type="build")
     depends_on("py-pathspec@1.1.1:", type="build")

@@ -41,6 +41,24 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
     version("1.10.0", tag="v1.10.0", commit="0d9030e79888d1d5828730b254fedc53c7b640c1")
     version("1.7.2", tag="v1.7.2", commit="5bc92dff16b0ddd5063b717fb8522ca2ad023cb0")
 
+    # Header-only libraries fetched by onnxruntime's FetchContent that don't
+    # have FIND_PACKAGE_ARGS and aren't available as separate Spack packages.
+    # These are downloaded as resources and pointed to via FETCHCONTENT_SOURCE_DIR_*.
+    resource(
+        name="mp11",
+        when="@1.18:",
+        url="https://github.com/boostorg/mp11/archive/refs/tags/boost-1.82.0.zip",
+        sha256="81431bdc44c439a324e02c07ed067f8f556419fd86f2d8b486ff568df6aac899",
+        placement="mp11",
+    )
+    resource(
+        name="safeint",
+        when="@1.18:",
+        url="https://github.com/dcleblanc/SafeInt/archive/refs/tags/3.0.28.zip",
+        sha256="3ffbd9a2fdff45da77da3e7269e9aa512ea43bed5c38ce8fd8f3d1068a032c3f",
+        placement="safeint",
+    )
+
     depends_on("c", type="build")
     depends_on("cxx", type="build")
 
@@ -69,8 +87,9 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
 
     depends_on("py-cerberus", type=("build", "run"))
     depends_on("py-onnx@:1.16", type=("build", "run"), when="@:1.18")
-    depends_on("py-onnx@:1.15.0", type=("build", "run"), when="@:1.17")
+    depends_on("py-onnx@:1.15.0", type=("build", "run"), when="@1.17")
     depends_on("py-onnx", type=("build", "run"))
+    depends_on("onnx", type=("build", "link"))
     depends_on("zlib-api")
     depends_on("libpng")
     depends_on("cuda", when="+cuda")
@@ -79,8 +98,10 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
     depends_on("re2+shared")
 
     # v1.27+ regenerated ABSEIL_LIBS without low_level_hash and requires abseil 20250814.
-    # Abseil uses COMPATIBILITY ExactVersion in CMake, we relax the dependency here.
-    depends_on("abseil-cpp@20250814:", when="@1.27:")
+    # Abseil uses COMPATIBILITY ExactVersion in CMake, so find_package(absl 20250814)
+    # requires an exact major version match. Pin to 20250814 to avoid target conflicts
+    # between a FetchContent-built abseil and a Spack-installed one.
+    depends_on("abseil-cpp@20250814", when="@1.27:")
     # abseil 20250814+ lacks absl::low_level_hash
     # https://github.com/microsoft/onnxruntime/issues/25815
     depends_on("abseil-cpp@20240722.0:20250512", when="@1.20:1.26")
@@ -93,12 +114,14 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
     # the +shared build only exports flatbuffers::flatbuffers_shared.
     # v1.18+ FIND_PACKAGE_ARGS is 23.5.9 (deps.txt v23.5.26).
     # v1.17 FIND_PACKAGE_ARGS is 1.12.0...<2.0.0 (deps.txt v1.12.0);
-    depends_on("flatbuffers@23.5.26: ~shared", when="@1.18:")
+    depends_on("flatbuffers@23.5.26 ~shared", when="@1.18:")
     depends_on("flatbuffers@1.12 ~shared", when="@1.17")
     depends_on("nlohmann-json@3.10:")
     depends_on("date@3")
     depends_on("cpuinfo")
     depends_on("cppgsl@4:")
+    depends_on("eigen@3.4.0:", when="@1.18:")
+    depends_on("dlpack@0.7:", when="@1.18:")
 
     rocm_dependencies = [
         "hsa-rocr-dev",
@@ -157,6 +180,8 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
     # Hashes in gitlab changed after a new compression algorithm was introduced
     patch("eigen-hash1.patch", when="@1.18:1.20")
     patch("eigen-hash2.patch", when="@1.21")
+    # Use Spack's eigen instead of FetchContent
+    patch("eigen-find-package.patch", when="@1.18:", level=1)
     # Add compatibility with the latest protobuf: https://github.com/microsoft/onnxruntime/pull/23260
     patch(
         "https://github.com/microsoft/onnxruntime/pull/23260.patch?full_index=1",
@@ -235,6 +260,13 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
             define("onnxruntime_USE_FULL_PROTOBUF", True),
             define("onnxruntime_DISABLE_CONTRIB_OPS", False),
         ]
+
+        # Point FetchContent to locally downloaded resources for header-only
+        # libraries that don't have FIND_PACKAGE_ARGS
+        if self.spec.satisfies("@1.18:"):
+            source_path = self.stage.source_path
+            args.append(define("FETCHCONTENT_SOURCE_DIR_MP11", f"{source_path}/mp11"))
+            args.append(define("FETCHCONTENT_SOURCE_DIR_SAFEINT", f"{source_path}/safeint"))
 
         if self.spec.satisfies("+cuda"):
             args.extend(

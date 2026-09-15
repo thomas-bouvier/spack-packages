@@ -27,7 +27,9 @@ class PyDocket(PythonPackage):
     depends_on("py-taskgroup@0.2.2:", type=("build", "run"), when="@0.17.2:")
     depends_on("py-fakeredis@2.32.1: +lua", type=("build", "run"))
     depends_on("py-opentelemetry-api@1.33.0:", type=("build", "run"))
-    depends_on("py-opentelemetry-exporter-prometheus@0.60b0:", type=("build", "run"), when="@:0.16.6")
+    depends_on(
+        "py-opentelemetry-exporter-prometheus@0.60b0:", type=("build", "run"), when="@:0.16.6"
+    )
     depends_on("py-opentelemetry-instrumentation@0.60b0:", type=("build", "run"), when="@:0.16.6")
     depends_on("py-prometheus-client@0.21.1:", type=("build", "run"))
     depends_on("py-key-value-aio@0.3: +memory +redis", type=("build", "run"))

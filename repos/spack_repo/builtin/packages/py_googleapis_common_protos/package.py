@@ -35,9 +35,9 @@ class PyGoogleapisCommonProtos(PythonPackage):
     with default_args(type=("build", "run")):
         depends_on("py-protobuf@3.20.2:6", when="@1.72:")
         depends_on("py-protobuf@3.19.5:4", when="@1.58:1.63")
-        depends_on("py-protobuf@3.15.0:4", when="@1.56:1.57")
-        depends_on("py-protobuf@3.12.0:4", when="@1.55")
-        depends_on("py-protobuf@3.6.0:", when="@1.6")
+        depends_on("py-protobuf@3.15.0:4", when="@1.56.1:1.57")
+        depends_on("py-protobuf@3.12.0:4", when="@1.53:1.56.0")
+        depends_on("py-protobuf@3.6.0:", when="@1.6:")
 
     conflicts("py-protobuf@3.20:3.20.1,4.21.1:4.21.5")
 

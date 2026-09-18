@@ -54,7 +54,7 @@ class PyHuggingfaceHub(PythonPackage):
         depends_on("py-httpx@0.23:0", when="@1:")
         depends_on("py-packaging@20.9:", when="@0.10:")
         depends_on("py-pyyaml@5.1:", when="@0.10:")
-        depends_on("py-requests")
+        depends_on("py-requests", when="@:0")
         depends_on("py-tqdm@4.42.1:", when="@0.12:")
         depends_on("py-tqdm")
         depends_on("py-typing-extensions@4.1:", when="@1.2.4:")

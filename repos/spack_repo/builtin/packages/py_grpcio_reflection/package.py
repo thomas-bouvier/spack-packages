@@ -13,6 +13,8 @@ class PyGrpcioReflection(PythonPackage):
     homepage = "https://grpc.io/"
     pypi = "grpcio_reflection/grpcio_reflection-1.78.0.tar.gz"
 
+    license("Apache-2.0")
+
     version("1.78.0", sha256="e6e60c0b85dbcdf963b4d4d150c0f1d238ba891d805b575c52c0365d07fc0c40")
 
     depends_on("python@3.9:", type=("build", "run"))

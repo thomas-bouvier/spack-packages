@@ -46,6 +46,7 @@ class PyHuggingfaceHub(PythonPackage):
         depends_on("py-setuptools")
 
     with default_args(type=("build", "run")):
+        depends_on("py-click@8.4.2:8", when="@1.22:")
         depends_on("py-click@8.4:8", when="@1.16.2:")
         depends_on("py-filelock@3.10:", when="@1.5:")
         depends_on("py-filelock")

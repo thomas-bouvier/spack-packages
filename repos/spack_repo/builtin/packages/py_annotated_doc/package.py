@@ -14,6 +14,8 @@ class PyAnnotatedDoc(PythonPackage):
     homepage = "https://github.com/fastapi/annotated-doc"
     pypi = "annotated_doc/annotated_doc-0.0.4.tar.gz"
 
+    license("MIT")
+
     version("0.0.4", sha256="fbcda96e87e9c92ad167c2e53839e57503ecfda18804ea28102353485033faa4")
 
     depends_on("python@3.8:", type=("build", "run"))

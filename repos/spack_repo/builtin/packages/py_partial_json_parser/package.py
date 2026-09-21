@@ -13,6 +13,8 @@ class PyPartialJsonParser(PythonPackage):
     homepage = "https://github.com/promplate/partial-json-parser"
     pypi = "partial_json_parser/partial_json_parser-0.2.1.1.post7.tar.gz"
 
+    license("MIT")
+
     version(
         "0.2.1.1.post7", sha256="86590e1ba6bcb6739a2dfc17d2323f028cb5884f4c6ce23db376999132c9a922"
     )

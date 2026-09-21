@@ -99,11 +99,20 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
                 type="build",
             )
 
-        # CUTLASS source. vLLM's CMakeLists.txt pins CUTLASS_REVISION to v4.2.1 for
-        # v0.16.0 and uses FetchContent_Declare(cutlass SOURCE_DIR ...), which needs
-        # the full source tree (not just an install prefix with headers). We drop
-        # the source into the build tree via a Spack resource and point
+        # CUTLASS source. vLLM's CMakeLists.txt pins a CUTLASS_REVISION per
+        # release (v4.2.1 for v0.16.0, v4.4.2 for v0.28.0) and uses
+        # FetchContent_Declare(cutlass SOURCE_DIR ...), which needs the full
+        # source tree (not just an install prefix with headers). We drop the
+        # source into the build tree via a Spack resource and point
         # VLLM_CUTLASS_SRC_DIR at it in setup_build_environment.
+        resource(
+            name="cutlass",
+            url="https://github.com/NVIDIA/cutlass/archive/refs/tags/v4.4.2.tar.gz",
+            sha256="ef62816841b8cbcd0ed3ec45d3ab56cf67d569a0f39329b43eeeebea86f58473",
+            destination=".",
+            placement="cutlass-src",
+            when="@0.28.0",
+        )
         resource(
             name="cutlass",
             url="https://github.com/NVIDIA/cutlass/archive/refs/tags/v4.2.1.tar.gz",
@@ -111,6 +120,150 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
             destination=".",
             placement="cutlass-src",
             when="@0.16.0",
+        )
+
+        # vLLM FetchContent-clones the external projects below at configure
+        # time (cmake/external_projects/*.cmake), each pinned to a fixed git
+        # commit. Stage the pinned trees as Spack resources instead, so builds
+        # are checksummed and work without network access. Every project
+        # supports a <NAME>_SRC_DIR override, wired up in
+        # setup_build_environment. Git submodules (cutlass, fmt) are staged
+        # separately: GitHub tarballs do not contain submodule contents, only
+        # empty placeholder directories. Because Spack skips a resource whose
+        # destination already exists, the submodule resources use dict
+        # placements targeting the subtrees each project actually consumes
+        # (its pinned cmake files list them), never the placeholder directory
+        # itself.
+        resource(
+            name="triton",
+            url="https://github.com/triton-lang/triton/archive/refs/tags/v3.5.1.tar.gz",
+            sha256="03d7c41f6f2dc1dfa3445776c4a893dc34b1e0ece42b953f036c071ff6409b80",
+            destination=".",
+            placement="triton-src",
+            when="@0.28.0",
+        )
+        resource(
+            name="deepgemm",
+            url="https://github.com/deepseek-ai/DeepGEMM/archive/8b1392b978f5a03c828dd1711090d7fb50958b8a.tar.gz",  # noqa: E501
+            sha256="d5181fff7d29c8c7386a1a7f656e764663502ed878e228d5ec8fa5eff2feb67f",
+            destination=".",
+            placement="deepgemm-src",
+            when="@0.28.0",
+        )
+        resource(
+            name="deepgemm-cutlass",
+            url="https://github.com/NVIDIA/cutlass/archive/f3fde58372d33e9a5650ba7b80fc48b3b49d40c8.tar.gz",  # noqa: E501
+            sha256="2e5890306557bd87136e1d6914e4ee42536050b9116433848175520fd15991f2",
+            destination=".",
+            placement={
+                "include": "deepgemm-src/third-party/cutlass/include",
+                "tools/util/include": "deepgemm-src/third-party/cutlass/tools/util/include",
+            },
+            when="@0.28.0",
+        )
+        resource(
+            name="deepgemm-fmt",
+            url="https://github.com/fmtlib/fmt/archive/553ec11ec06fbe0beebfbb45f9dc3c9eabd83d28.tar.gz",  # noqa: E501
+            sha256="c314292789d28c3c3b420e75a7b2d1706f685f7fb63289128d46aeaea2c6be71",
+            destination=".",
+            placement={"include": "deepgemm-src/third-party/fmt/include"},
+            when="@0.28.0",
+        )
+        resource(
+            name="fmha-sm100",
+            url="https://github.com/vllm-project/MSA/archive/087c161814d4d9c735b46c21212a09e5f8eb92fa.tar.gz",  # noqa: E501
+            sha256="32efbae22ce41f85adf01dfd3ad98494a774591b10d00ea558a94d34170d579a",
+            destination=".",
+            placement="msa-src",
+            when="@0.28.0",
+        )
+        resource(
+            name="fmha-sm100-cutlass",
+            url="https://github.com/NVIDIA/cutlass/archive/eb61c911471867a5fd2466bfd8f29306cea6ebf8.tar.gz",  # noqa: E501
+            sha256="ffe392246cc3517017c4b91d14bbcb28aae28d26d1847b333371eb13bfec52eb",
+            destination=".",
+            placement={
+                "include": "msa-src/python/fmha_sm100/cutlass/include",
+                "tools/util/include": "msa-src/python/fmha_sm100/cutlass/tools/util/include",
+            },
+            when="@0.28.0",
+        )
+        resource(
+            name="flashmla",
+            url="https://github.com/vllm-project/FlashMLA/archive/a8f794d1251cbfd88a5011445dd5582289c727e4.tar.gz",  # noqa: E501
+            sha256="36b9409fabb373f13d5b5b841125e71f5e11875283e752c43df5ee47f5def96b",
+            destination=".",
+            placement="flashmla-src",
+            when="@0.28.0",
+        )
+        resource(
+            name="flashmla-cutlass",
+            url="https://github.com/NVIDIA/cutlass/archive/147f5673d0c1c3dcf66f78d677fd647e4a020219.tar.gz",  # noqa: E501
+            sha256="9f6c53320a85b4a570975e557918cde65168cd311f081920446c238437347dc6",
+            destination=".",
+            placement={
+                "include": "flashmla-src/csrc/cutlass/include",
+                "tools/util/include": "flashmla-src/csrc/cutlass/tools/util/include",
+            },
+            when="@0.28.0",
+        )
+        resource(
+            name="flashkda",
+            url="https://github.com/vllm-project/FlashKDA/archive/053de1b716ef3255873e02d2d28f4adf09951978.tar.gz",  # noqa: E501
+            sha256="9665899dcbca31c8d9af55b9ff126b7a9c15710f1c12505d03cfba39d6c243d5",
+            destination=".",
+            placement="flashkda-src",
+            when="@0.28.0",
+        )
+        resource(
+            name="flashkda-cutlass",
+            url="https://github.com/NVIDIA/cutlass/archive/5c149f52a436782210263fb2f19b354443a61c6a.tar.gz",  # noqa: E501
+            sha256="fbf35b9d16a3c2c7384a4a044a5407d1dea334d74b3152357c1fa246bc07c6dc",
+            destination=".",
+            placement={
+                "include": "flashkda-src/cutlass/include",
+                "examples/common": "flashkda-src/cutlass/examples/common",
+                "tools/util/include": "flashkda-src/cutlass/tools/util/include",
+            },
+            when="@0.28.0",
+        )
+        # QuTLASS needs no vendored submodule resource: it uses the
+        # CUTLASS_INCLUDE_DIR cache variable, which CUTLASS's own CMakeLists
+        # sets to the cutlass-src tree staged above.
+        resource(
+            name="qutlass",
+            url="https://github.com/IST-DASLab/qutlass/archive/e74319e3405ce6d71965732880f5dc1f52371f64.tar.gz",  # noqa: E501
+            sha256="39dda9c3626e024f00cd0afbe54971edce79fa12f0842d79022c8e23303faea3",
+            destination=".",
+            placement="qutlass-src",
+            when="@0.28.0",
+        )
+        resource(
+            name="tml-fa4",
+            url="https://github.com/vllm-project/tml-fa4/archive/b206834606ed5b5f21f8eed6b0683f528ea9cf7d.tar.gz",  # noqa: E501
+            sha256="7f42421e89a030e10c5a336dcfc405e16565a106698da855ddbcfa86dd0e602e",
+            destination=".",
+            placement="tml-fa4-src",
+            when="@0.28.0",
+        )
+        resource(
+            name="flash-attention",
+            url="https://github.com/vllm-project/flash-attention/archive/f3e1a4f74c99145c0717709860bf765de1703779.tar.gz",  # noqa: E501
+            sha256="088552752435faf7902d6c64aa41cb297f3d2354d81aa992d6be8bb074eed7cf",
+            destination=".",
+            placement="flash-attn-src",
+            when="@0.28.0",
+        )
+        resource(
+            name="flash-attention-cutlass",
+            url="https://github.com/NVIDIA/cutlass/archive/62750a2b75c802660e4894434dc55e839f322277.tar.gz",  # noqa: E501
+            sha256="78816d6c6d97793b5b59ef2a702174cb85b78dfcefc8fe2489964de2e42f17d2",
+            destination=".",
+            placement={
+                "include": "flash-attn-src/csrc/cutlass/include",
+                "tools/util/include": "flash-attn-src/csrc/cutlass/tools/util/include",
+            },
+            when="@0.28.0",
         )
 
     with when("+rocm"):
@@ -230,6 +383,34 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
             arches = self.spec.variants["cuda_arch"].value
             torch_arch = ";".join("{}.{}".format(a[:-1], a[-1]) for a in arches)
             env.set("TORCH_CUDA_ARCH_LIST", torch_arch)
+
+            # Redirect the external projects vLLM FetchContent-clones at
+            # configure time (cmake/external_projects/*.cmake) to the source
+            # trees staged by the resource() directives above, using each
+            # project's documented local-source override.
+            if self.spec.satisfies("@0.28.0"):
+                src = self.stage.source_path
+                env.set(
+                    "TRITON_KERNELS_SRC_DIR",
+                    join_path(src, "triton-src", "python", "triton_kernels", "triton_kernels"),
+                )
+                env.set("DEEPGEMM_SRC_DIR", join_path(src, "deepgemm-src"))
+                env.set("FMHA_SM100_SRC_DIR", join_path(src, "msa-src"))
+                env.set("FLASH_MLA_SRC_DIR", join_path(src, "flashmla-src"))
+                env.set("FLASH_KDA_SRC_DIR", join_path(src, "flashkda-src"))
+                env.set("QUTLASS_SRC_DIR", join_path(src, "qutlass-src"))
+                env.set("TML_FA4_SRC_DIR", join_path(src, "tml-fa4-src"))
+                # Not VLLM_FLASH_ATTN_SRC_DIR: with it, vLLM installs the FA4
+                # CuteDSL kernels as a symlink into the build stage instead of
+                # copying the files, leaving a dangling symlink after stage
+                # cleanup. The FetchContent cache variable below (passed via
+                # the CMAKE_ARGS env var, forwarded by vLLM's setup.py) keeps
+                # the copy-based install while still skipping the download.
+                env.set(
+                    "CMAKE_ARGS",
+                    "-DFETCHCONTENT_SOURCE_DIR_VLLM-FLASH-ATTN=%s"
+                    % join_path(src, "flash-attn-src"),
+                )
         elif self.spec.satisfies("+rocm"):
             env.set("ROCM_HOME", self.spec["rocm"].prefix)
         else:

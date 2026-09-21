@@ -15,6 +15,8 @@ class PyTokenizers(PythonPackage):
     pypi = "tokenizers/tokenizers-0.6.0.tar.gz"
     git = "https://github.com/huggingface/tokenizers.git"
 
+    license("Apache-2.0")
+
     version("main", branch="main")
     version("0.23.1", sha256="1feeeadf865a7915adc25445dea30e9933e593c31bb96c277cee36de227c8bfa")
     version("0.22.2", sha256="473b83b915e547aa366d1eee11806deaf419e17be16310ac0a14077f1e28f917")

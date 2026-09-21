@@ -13,6 +13,8 @@ class PyInteregular(PythonPackage):
     homepage = "https://github.com/MegaIng/interegular"
     pypi = "interegular/interegular-0.3.3.tar.gz"
 
+    license("MIT")
+
     version("0.3.3", sha256="d9b697b21b34884711399ba0f0376914b81899ce670032486d0d048344a76600")
 
     depends_on("python@3.7:", type=("build", "run"))

@@ -8,7 +8,10 @@ from spack.package import *
 
 
 class PyPycountry(PythonPackage):
-    """ISO country, subdivision, language, currency and script definitions and their translations."""
+    """
+    ISO country, subdivision, language, currency and script definitions and
+    their translations.
+    """
 
     homepage = "https://github.com/pycountry/pycountry"
     pypi = "pycountry/pycountry-26.2.16.tar.gz"

@@ -86,6 +86,13 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
         # triton 3.x). Without this, vLLM logs "No module named
         # 'triton.language.target_info'" and skips its Triton kernels.
         depends_on("py-triton@3.5.0:", type=("build", "run"))
+        # DeepGEMM's _C pybind11 extension is compiled by vLLM's
+        # tools/build_deepgemm_C.py, which builds a fixed include list with no
+        # pybind11 entry: upstream relies on pip-installed torch vendoring the
+        # headers under torch/include/. Spack-built torch links against this
+        # external pybind11 instead, so expose its headers via CPATH in
+        # setup_build_environment.
+        depends_on("py-pybind11", type="build", when="@0.28.0")
         # Propagate CUDA arch to py-torch and nccl
         for cuda_arch in CudaPackage.cuda_arch_values:
             depends_on(
@@ -394,6 +401,11 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
                     "TRITON_KERNELS_SRC_DIR",
                     join_path(src, "triton-src", "python", "triton_kernels", "triton_kernels"),
                 )
+                # The DeepGEMM _C driver (tools/build_deepgemm_C.py) calls $CXX
+                # directly with a hardcoded include list that has no pybind11
+                # entry; CXXFLAGS cannot reach it, but gcc/clang honor CPATH.
+                # See the py-pybind11 depends_on above.
+                env.prepend_path("CPATH", self.spec["py-pybind11"].prefix.include)
                 env.set("DEEPGEMM_SRC_DIR", join_path(src, "deepgemm-src"))
                 env.set("FMHA_SM100_SRC_DIR", join_path(src, "msa-src"))
                 env.set("FLASH_MLA_SRC_DIR", join_path(src, "flashmla-src"))

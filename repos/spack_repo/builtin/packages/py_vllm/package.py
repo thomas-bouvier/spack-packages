@@ -80,8 +80,10 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
         depends_on("py-torch@2.9.1 +gloo", when="@0.16.0", type="build")
         # cuDNN / cuSPARSELt / kineto must be enabled in py-torch itself,
         # otherwise vLLM's CMake reports USE_CUDNN=0, USE_CUSPARSELT=0 and
-        # kineto_LIBRARY-NOTFOUND.
-        depends_on("py-torch +cuda +cudnn +cusparselt +kineto +nccl", type="build")
+        # kineto_LIBRARY-NOTFOUND. Gloo is required at runtime even for
+        # single-GPU runs: vLLM's GroupCoordinator always creates a gloo
+        # CPU group, and py-torch defaults to ~gloo.
+        depends_on("py-torch +cuda +gloo +cudnn +cusparselt +kineto +nccl", type="build")
         # vLLM's CUDA kernels import triton.language.target_info (added in
         # triton 3.x). Without this, vLLM logs "No module named
         # 'triton.language.target_info'" and skips its Triton kernels.

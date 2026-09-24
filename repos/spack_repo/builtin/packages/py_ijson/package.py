@@ -13,6 +13,8 @@ class PyIjson(PythonPackage):
     homepage = "https://github.com/ICRAR/ijson"
     pypi = "ijson/ijson-3.5.0.tar.gz"
 
+    license("BSD-3-Clause AND ISC")
+
     version("3.5.0", sha256="94688760720e3f5212731b3cb8d30267f9a045fb38fb3870254e7b9504246f31")
 
     depends_on("c", type="build")

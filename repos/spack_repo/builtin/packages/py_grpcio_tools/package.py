@@ -27,6 +27,8 @@ class PyGrpcioTools(PythonPackage):
     depends_on("c", type="build")
     depends_on("cxx", type="build")
 
+    # https://github.com/grpc/grpc/blob/v1.81.0/tools/distrib/python/grpcio_tools/python_version.py
+    depends_on("python@3.10:", when="@1.81.0:", type=("build", "run"))
     depends_on("python@3.9:", when="@1.71.0:", type=("build", "run"))
     depends_on("python@3.6:", type=("build", "run"))
     depends_on("py-setuptools@77.0.1:", when="@1.78.0:", type="build")
@@ -34,6 +36,7 @@ class PyGrpcioTools(PythonPackage):
     # https://github.com/grpc/grpc/blob/v1.73.1/tools/distrib/python/grpcio_tools/setup.py
     depends_on("py-protobuf@6.31.1:6", when="@1.74.0:", type=("build", "run"))
     depends_on("py-protobuf@4.21.6:4", when="@1.50:1.62", type=("build", "run"))
+    depends_on("py-protobuf@4.21.3:4", when="@1.49", type=("build", "run"))
     depends_on("py-protobuf@3.12.0:3", when="@1.46:1.48", type=("build", "run"))
     depends_on("py-protobuf@3.5.0.post1:3", when="@:1.45", type=("build", "run"))
     # https://github.com/grpc/grpc/blob/v1.78.0/tools/distrib/python/grpcio_tools/grpc_version.pyz

@@ -4,14 +4,12 @@
 
 import os
 
-from spack_repo.builtin.build_systems.cuda import CudaPackage
 from spack_repo.builtin.build_systems.python import PythonPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class PyTriton(PythonPackage, CudaPackage, ROCmPackage):
+class PyTriton(PythonPackage):
     """A language and compiler for custom Deep Learning operations."""
 
     homepage = "https://github.com/triton-lang/triton"
@@ -53,7 +51,8 @@ class PyTriton(PythonPackage, CudaPackage, ROCmPackage):
         depends_on("nlohmann-json@3.11.3", when="@3:")
         depends_on("py-pybind11")
         # depends_on("roctracer-dev")
-        depends_on("cuda@10:")
+
+    depends_on("cuda@10:", type=("build", "run"))
 
     depends_on("py-setuptools@40.8.0:", type="run", when="@3.2.0")
     depends_on("py-filelock", type=("build", "run"))
@@ -235,15 +234,14 @@ class PyTriton(PythonPackage, CudaPackage, ROCmPackage):
         # otherwise the JIT fails with "Cannot find ptxas" / cuda.h not found
         # when invoked from a subprocess that doesn't inherit the build env
         # (e.g. vLLM's EngineCore worker via multiprocessing.spawn).
-        if "cuda" in self.spec:
-            cuda = self.spec["cuda"].prefix
-            env.set("CUDA_HOME", cuda)
-            # The runtime JIT patch (triton-v3.5.1-cuda-home-include.patch)
-            # reads CUDA_HOME to add it to the gcc -I flags. Without it the
-            # JIT can't find cuda.h.
-            env.set("TRITON_PTXAS_PATH", cuda.bin.ptxas)
-            env.set("TRITON_CUOBJDUMP_PATH", cuda.bin.cuobjdump)
-            env.set("TRITON_NVDISASM_PATH", cuda.bin.nvdisasm)
+        cuda = self.spec["cuda"].prefix
+        env.set("CUDA_HOME", cuda)
+        # The runtime JIT patch (triton-v3.5.1-cuda-home-include.patch)
+        # reads CUDA_HOME to add it to the gcc -I flags. Without it the
+        # JIT can't find cuda.h.
+        env.set("TRITON_PTXAS_PATH", cuda.bin.ptxas)
+        env.set("TRITON_CUOBJDUMP_PATH", cuda.bin.cuobjdump)
+        env.set("TRITON_NVDISASM_PATH", cuda.bin.nvdisasm)
 
     @property
     def build_directory(self):

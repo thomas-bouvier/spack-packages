@@ -47,13 +47,14 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
     depends_on("py-jinja2", type="build")
     depends_on("py-grpcio-tools", type="build", when="@:0.17")
 
+    # https://github.com/vllm-project/vllm/blob/v0.16.0/requirements
+    depends_on("py-torchvision", type=("build", "run"))
+    depends_on("py-torchaudio", type=("build", "run"))
+
     with when("~cuda~rocm"):
         # PyTorch is imported at build time to read metadata
         depends_on("py-torch@2.13.0 +kineto +gloo", type="build", when="@0.28.0")
         depends_on("py-torch@2.10.0 +kineto +gloo", type="build", when="@0.16.0")
-        # https://github.com/vllm-project/vllm/blob/v0.16.0/requirements/cpu.txt
-        depends_on("py-torchvision", type=("build", "run"))
-        depends_on("py-torchaudio", type=("build", "run"))
         depends_on("sleef", type=("build", "run", "link"))
         # oneDNN source. vLLM's cmake/cpu_extension.cmake fetches oneDNN via
         # FetchContent and compiles private headers from src/ (e.g.
@@ -70,6 +71,11 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
         )
 
     with when("+cuda"):
+        # Keep the CUDA version compatible with the *driver* on the target
+        # machines: several kernels are PTX-only fallbacks (FA2 ships
+        # "8.0+PTX", Marlin "8.0+PTX", scaled_mm_c2x "8.9+PTX") and are
+        # JIT-compiled by the driver at runtime. PTX from a toolkit newer
+        # than the driver fails with cudaErrorUnsupportedPtxVersion.
         depends_on("cuda", type=("build", "link", "run"))
         conflicts(
             "cuda_arch=none",
@@ -78,23 +84,11 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
         )
 
         depends_on("py-torch@2.9.1 +gloo", when="@0.16.0", type="build")
-        # cuDNN / cuSPARSELt / kineto must be enabled in py-torch itself,
-        # otherwise vLLM's CMake reports USE_CUDNN=0, USE_CUSPARSELT=0 and
-        # kineto_LIBRARY-NOTFOUND. Gloo is required at runtime even for
-        # single-GPU runs: vLLM's GroupCoordinator always creates a gloo
-        # CPU group, and py-torch defaults to ~gloo.
         depends_on("py-torch +cuda +gloo +cudnn +cusparselt +kineto +nccl", type="build")
-        # vLLM's CUDA kernels import triton.language.target_info (added in
-        # triton 3.x). Without this, vLLM logs "No module named
-        # 'triton.language.target_info'" and skips its Triton kernels.
         depends_on("py-triton@3.5.0:", type=("build", "run"))
-        # DeepGEMM's _C pybind11 extension is compiled by vLLM's
-        # tools/build_deepgemm_C.py, which builds a fixed include list with no
-        # pybind11 entry: upstream relies on pip-installed torch vendoring the
-        # headers under torch/include/. Spack-built torch links against this
-        # external pybind11 instead, so expose its headers via CPATH in
-        # setup_build_environment.
+        depends_on("py-flashinfer@0.6.16.post3", type="run", when="@0.28.0")
         depends_on("py-pybind11", type="build", when="@0.28.0")
+
         # Propagate CUDA arch to py-torch and nccl
         for cuda_arch in CudaPackage.cuda_arch_values:
             depends_on(
@@ -134,15 +128,7 @@ class PyVllm(PythonPackage, CudaPackage, ROCmPackage):
         # vLLM FetchContent-clones the external projects below at configure
         # time (cmake/external_projects/*.cmake), each pinned to a fixed git
         # commit. Stage the pinned trees as Spack resources instead, so builds
-        # are checksummed and work without network access. Every project
-        # supports a <NAME>_SRC_DIR override, wired up in
-        # setup_build_environment. Git submodules (cutlass, fmt) are staged
-        # separately: GitHub tarballs do not contain submodule contents, only
-        # empty placeholder directories. Because Spack skips a resource whose
-        # destination already exists, the submodule resources use dict
-        # placements targeting the subtrees each project actually consumes
-        # (its pinned cmake files list them), never the placeholder directory
-        # itself.
+        # are checksummed and work without network access.
         resource(
             name="triton",
             url="https://github.com/triton-lang/triton/archive/refs/tags/v3.5.1.tar.gz",

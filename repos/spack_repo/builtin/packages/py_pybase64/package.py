@@ -20,4 +20,4 @@ class PyPybase64(PythonPackage):
     depends_on("c", type="build")
 
     depends_on("python@3.8:", type=("build", "run"))
-    depends_on("py-setuptools@80:", type="build")
+    depends_on("py-setuptools", type="build")

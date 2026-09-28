@@ -13,6 +13,8 @@ class PyOpenaiHarmony(PythonPackage):
     homepage = "https://github.com/openai/harmony"
     pypi = "openai_harmony/openai_harmony-0.0.8.tar.gz"
 
+    license("Apache-2.0")
+
     version("0.0.8", sha256="6e43f98e6c242fa2de6f8ea12eab24af63fa2ed3e89c06341fb9d92632c5cbdf")
 
     depends_on("python@3.8:", type=("build", "run"))

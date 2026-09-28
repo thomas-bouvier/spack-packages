@@ -49,9 +49,10 @@ class PyOpenai(PythonPackage):
     depends_on("py-pydantic@1.9.0:2", type=("build", "run"), when="@1:")
     depends_on("py-tqdm@4:", type=("build", "run"), when="@1:")  # the repo says tqdm>4, impossible
     depends_on("py-tqdm", type=("build", "run"))
-    depends_on("py-typing-extensions@4.11:4", type=("build", "run"), when="@1.40:")
+    depends_on("py-typing-extensions@4.14:4", type=("build", "run"), when="@2.29:")
+    depends_on("py-typing-extensions@4.11:4", type=("build", "run"), when="@1.40:2.28")
     depends_on("py-typing-extensions@4.7:4", type=("build", "run"), when="@1.6:1.39")
-    depends_on("py-typing-extensions@4.5:4", type=("build", "run"), when="@:1.5")
+    depends_on("py-typing-extensions@4.5:4", type=("build", "run"), when="@1:1.5")
     depends_on("py-typing-extensions", type=("build", "run"), when="^python@3.7")
     depends_on("py-anyio@3.5:4", type=("build", "run"), when="@1.3.8:")
     depends_on("py-anyio@3.5:3", type=("build", "run"), when="@:1.3.7")
@@ -69,9 +70,8 @@ class PyOpenai(PythonPackage):
     depends_on("py-aiohttp", when="@0", type=("build", "run"))
 
     with when("+datalib"):
-        depends_on("py-numpy@1:", when="@1:", type=("build", "run"))
-        depends_on("py-numpy", type=("build", "run"))
         depends_on("py-numpy@1:", type=("build", "run"), when="@1:")
+        depends_on("py-numpy", type=("build", "run"))
         depends_on("py-pandas@1.2.3:", type=("build", "run"))
         depends_on("py-pandas-stubs@1.1.0.11:", type=("build", "run"))
 

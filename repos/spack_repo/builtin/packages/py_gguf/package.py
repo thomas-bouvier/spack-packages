@@ -12,7 +12,6 @@ class PyGguf(PythonPackage):
 
     homepage = "https://github.com/ggml-org/llama.cpp"
     pypi = "gguf/gguf-0.18.0.tar.gz"
-    git = "https://github.com/ggml-org/llama.cpp/tree/master/gguf-py"
 
     license("MIT")
 

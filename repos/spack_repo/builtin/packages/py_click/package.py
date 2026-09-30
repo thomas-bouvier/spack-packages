@@ -35,6 +35,8 @@ class PyClick(PythonPackage):
     depends_on("python@3.10:", when="@8.2:", type=("build", "run"))
     # Needed to ensure that Spack can bootstrap black with Python 3.6
     depends_on("python@3.7:", when="@8.1:", type=("build", "run"))
+    with when("@8.3.1:"):
+        depends_on("py-flit-core@3.11:3", type="build")
     with when("@8.1.8:"):
         depends_on("py-flit-core@:3", type="build")
     with when("@:8.1.7"):

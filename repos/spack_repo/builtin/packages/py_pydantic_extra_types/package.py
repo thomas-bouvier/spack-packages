@@ -22,9 +22,10 @@ class PyPydanticExtraTypes(PythonPackage):
 
     variant("pycountry", default=False, description="Enable pycountry support")
 
+    depends_on("python@3.9:", type=("build", "run"), when="@2.11:")
     depends_on("python@3.8:", type=("build", "run"))
     depends_on("py-hatchling", type="build")
     depends_on("py-pydantic@2.5.2:", type=("build", "run"))
     depends_on("py-typing-extensions", type=("build", "run"))
 
-    depends_on("py-pycountry", type=("build", "run"), when="+pycountry")
+    depends_on("py-pycountry@23:", type=("build", "run"), when="+pycountry")

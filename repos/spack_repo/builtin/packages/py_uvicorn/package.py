@@ -11,7 +11,7 @@ from spack.package import *
 class PyUvicorn(PythonPackage):
     """The lightning-fast ASGI server."""
 
-    homepage = "https://www.uvicorn.org/"
+    homepage = "https://uvicorn.dev/"
     pypi = "uvicorn/uvicorn-0.27.1.tar.gz"
 
     license("BSD-3-Clause")

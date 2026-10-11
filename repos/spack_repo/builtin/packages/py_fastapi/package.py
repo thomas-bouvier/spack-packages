@@ -69,6 +69,7 @@ class PyFastapi(PythonPackage):
         conflicts("^py-ujson@4.0.2,4.1.0,4.2.0,4.3.0,5.0.0,5.1.0", when="@:0.128.3")
 
     with when("+standard"):
+        depends_on("py-fastapi-cli@0.0.8:+standard", type=("build", "run"))
         depends_on("py-httpx@0.23:0", type=("build", "run"))
         depends_on("py-jinja2@3.1.5:", when="@0.115.12:", type=("build", "run"))
         depends_on("py-jinja2@2.11.2:", type=("build", "run"))

@@ -19,5 +19,5 @@ class PyFastar(PythonPackage):
     version("0.12.0", sha256="bba71522eae6a7627a5514ffdd4ac9645ef27d82e23931d79fd974bb49c3f2ad")
 
     depends_on("python@3.8:", type=("build", "run"))
-    depends_on("py-maturin@1.41.1:1", type="build")
+    depends_on("py-maturin@1.14.1:1", type="build")
     depends_on("rust", type="build")

@@ -13,11 +13,8 @@ class PyCompressedTensors(PythonPackage):
     homepage = "https://github.com/vllm-project/compressed-tensors"
     pypi = "compressed_tensors/compressed_tensors-0.13.0.tar.gz"
 
-<<<<<<< HEAD
     license("Apache-2.0")
 
-=======
->>>>>>> 2d75d87da2 (py-vllm: add v0.28.0)
     version("0.17.0", sha256="15c20d06bdbcf35b51fc99fd125e7b9be1e1855567c33b7a46dfac26ad6fb126")
     version("0.13.0", sha256="23893824d3498ea3f1a829f14a8fa85f9a5e76a34c711a038b8d7c619ca9a67c")
 
